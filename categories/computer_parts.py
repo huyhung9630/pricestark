@@ -15,6 +15,7 @@ def scrape_site(site, part_name, soup):
         site_function = tiki
     elif(site == "www.lazada.vn"):
         site_function = lazada
+    
     part_list = site_function(soup, part_name, site)
     return part_list
 
@@ -43,9 +44,9 @@ def tiki(soup, part_name, site):
             urls = re.findall(r'https?://\S+', img_links)
             img_link = urls[0] if urls else ""
 
-            site = product.find('a', class_ = 'style__ProductLink-sc-139nb47-2 cKoUly product-item')["href"]
-            if "tiki.vn" not in site:
-                site = "tiki.vn" + site
+            link = product.find('a', class_ = 'style__ProductLink-sc-139nb47-2 cKoUly product-item')["href"]
+            if "tiki.vn" not in link:
+                link = "tiki.vn" + link
             flag = 0
             for word in part_name.split(" "):
                 if(word not in title.lower().split()):
@@ -78,7 +79,7 @@ def lazada(soup, part_name, site):
             link = ""
 
             img_link = product.find('img')["src"]
-            site = product.find('div', class_ = '_95X4G').a["href"]
+            link = product.find('div', class_ = '_95X4G').a["href"]
 
             flag = 0
             for word in part_name.split(" "):
@@ -86,7 +87,6 @@ def lazada(soup, part_name, site):
                     flag = 1
                     break
             if(flag == 0):
-                print(img_link)
                 part_list.append((title,price,link,img_link,site))
         except:
             print("error")
@@ -94,32 +94,3 @@ def lazada(soup, part_name, site):
 
     return part_list
 
-def thegioididong(soup, part_name,site):
-    driver = webdriver.Chrome()
-
-    driver.get("https://www.thegioididong.com/dtdd")
-
-    driver.implicitly_wait(10)
-
-    part_list = []
-    page_source = driver.page_source
-    soup = BeautifulSoup(page_source, "html.parser")
-
-    products = soup.find_all('li', class_='item ajaxed __cate_42')
-
-    for product in products:
-        try:
-            name = product.find('h3').text
-            price = product.find('strong', class_='price').text
-            link = "https://www.thegioididong.com" + product.a['href']
-            img_link = product.find('div', class_='item-img item-img_42').img['src']
-            flag = 0
-            for word in part_name.split():
-                if (word not in name.lower().split()):
-                    flag = 1
-                    break
-            if (flag == 0):
-                part_list.append((name,price,link, img_link,site))
-        except:
-            continue
-    return part_list

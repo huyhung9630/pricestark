@@ -1,119 +1,80 @@
-from bs4 import BeautifulSoup
 import requests
+import bs4
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 headers = {"User-Agent" : "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0"}
 
-parts_sites ={ "+":[("www.flipkart.com" , "https://www.flipkart.com/search?q=item"),
-                    ("www.snapdeal.com" , "https://www.snapdeal.com/search?keyword=item"),
-                    ("www.amazon.in", "https://www.amazon.in/s?k=item")
-                ]
-}
-
-
-'''elif(site == "www.ebay.com"):
-    site_function = ebay'''
-
+parts_sites ={"+":[("www.lazada.vn" , "https://www.lazada.vn/tag/headphone"), ("www.thegioididong.com", "https://www.thegioididong.com/tai-nghe")] }
 
 def scrape_site(site, part_name, soup):
 
-    if(site == "www.amazon.in"):
-        site_function = amazon
-    elif(site == "www.flipkart.com"):
-        site_function = flipkart
-    elif(site == "www.snapdeal.com"):
-        site_function = snapdeal
+    if(site == 'www.lazada.vn'):
+        site_function = lazada
+    elif (site == "www.thegioididong.com"):
+        site_function = thegioididong
 
     part_list = site_function(soup, part_name, site)
     return part_list
 
-def amazon(soup , part_name , site):
+# #HEADPHONEZONE
+
+def thegioididong(soup, part_name, site):
+    
+    driver = webdriver.Chrome()
+
+    driver.get("https://www.thegioididong.com/tai-nghe")
+
+    driver.implicitly_wait(10)
     part_list = []
-    print("amazon")
-    results = soup.findAll("div", {"class": "a-section a-spacing-medium"})
-    for result in results:
+    page_source = driver.page_source
+    soup = BeautifulSoup(page_source, "html.parser")
+
+    products = soup.find_all('li', class_ = "item __cate_54")
+
+    for product in products:
         try:
-            title = result.find("span" , {"class":"a-size-medium a-color-base a-text-normal"}).get_text().strip()
-
-            price = result.find("span", {"class": "a-offscreen"}).get_text().strip().replace("Rs.", "₹")
-
-            link = "https://amazon.in" + \
-                result.find("a", {"class": "a-link-normal a-text-normal"})['href'].strip()
-
-            img = result.find("div", {"class": "a-section aok-relative s-image-fixed-height"}).img["src"]
-
+            name = product.find('h3').text.strip()
+            price = product.find('strong', class_='price').text
+            link = "https://www.thegioididong.com" + product.a['href']
+            img_link = product.find('img')['src']
             flag = 0
-            for word in part_name.split(" "):
-
-                if(word not in title.lower().split()):
+            for word in part_name.split():
+                if (word not in name.lower().split()):
                     flag = 1
                     break
-            if(flag == 0):
-                    part_list.append((title,price,link,img,site))
+            if (flag == 0):
+                part_list.append((name,price,link, img_link,site))
         except:
             continue
     return part_list
 
-def flipkart(soup , part_name , site):
+def lazada(soup, part_name, site):
+    driver = webdriver.Chrome() 
+    driver.get("https://www.lazada.vn/tag/headphone")
+    driver.implicitly_wait(10)
+
     part_list = []
-    results = soup.find_all("div" , {"class":"slAVV4"})
-    print("flipkart") 
-    for result in results:
+    page_source = driver.page_source
+    soup = BeautifulSoup(page_source, "html.parser")
+
+    products = soup.find_all('div', class_='qmXQo')
+
+    for product in products[0:10]:
         try:
-            title = result.find("a" , {"class":"wjcEIp"}).text
-
-            price = result.find("div" , {"class":"Nx9bqj"}).text
-
-            link_ = result.find("a" , {"class":"Zhf2z-"})
-            link = link_["href"]
-
-            img_ = result.find("a" , {"class":"Zhf2z-"})
-            img = img_["href"]
-
-            link_ = result.find("a" , {"class":"_2cLu-l"})
-            link = link_["href"]
-            print(title, price)
+            name = product.find('div',class_='RfADt').text
+            price = product.find('span', class_='ooOxS').text
+            link = product.find('div',class_='_95X4G').a['href']
+            img_link = product.find('img')['src']
             flag = 0
-
-            # for word in part_name.split(" "):
-            #     if(word not in title.lower().split()):
-            #         flag = 1
-            #         break
-            if(flag == 0):
-                    part_list.append((title,price,link,img,site))
-        except:
-            continue
-    return part_list
-
-def snapdeal(soup , part_name , site):
-    part_list = []
-    print("snapdeal")
-    results = soup.find_all("div" , {"class":"product-tuple-description"})
-
-    for item in results:
-        try:
-            result = item.find("div" , {"class":"product-desc-rating"})
-
-            title = result.a.p.get_text().strip()
-
-            price = result.find("span" , {"class":"lfloat product-price"}).get_text().strip().replace("Rs.","₹")
-
-            img_ = item.find("img" , {"class":"product-image"})
-            img = img_["src"]
-
-            link = result.a["href"]
-
-            flag = 0
-
-            for word in part_name.split(" "):
-                if(word not in title.lower().split()):
+            for word in part_name.split():
+                if (word not in name.lower().split()):
                     flag = 1
                     break
-            if(flag == 0):
-                    part_list.append((title,price,link.img,site))
+            if (flag == 0):
+                part_list.append((name,price,link,img_link,site))
         except:
             continue
-
+    driver.quit()
     return part_list
-
-
 

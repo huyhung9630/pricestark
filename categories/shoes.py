@@ -43,9 +43,9 @@ def tiki(soup, part_name, site):
             urls = re.findall(r'https?://\S+', img_links)
             img_link = urls[0] if urls else ""
 
-            site = product.find('a', class_ = 'style__ProductLink-sc-139nb47-2 cKoUly product-item')["href"]
-            if "tiki.vn" not in site:
-                site = "tiki.vn" + site
+            link = product.find('a', class_ = 'style__ProductLink-sc-139nb47-2 cKoUly product-item')["href"]
+            if "tiki.vn" not in link:
+                link = "tiki.vn" + link
             flag = 0
             for word in part_name.split(" "):
                 if(word not in title.lower().split()):
@@ -79,7 +79,7 @@ def lazada(soup, part_name, site):
 
             img_link = product.find('img')["src"]
 
-            site = product.find('div', class_ = '_95X4G').a["href"]
+            link = product.find('div', class_ = '_95X4G').a["href"]
 
             flag = 0
             for word in part_name.split(" "):
