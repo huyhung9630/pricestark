@@ -83,10 +83,10 @@ def lazada(soup, part_name, site):
             link = product.find('div', class_ = '_95X4G').a["href"]
 
             flag = 0
-            # for word in part_name.split(" "):
-            #     if(word not in title.lower().split()):
-            #         flag = 1
-            #         break
+            for word in part_name.split(" "):
+                if(word not in title.lower().split()):
+                    flag = 1
+                    break
             if(flag == 0):
                 part_list.append((title,price,link,img_link,site))
         except:
